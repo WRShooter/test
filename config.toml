@@ -1,6 +1,0 @@
-dbType="mysql"
-dbHost="tcp(127.0.0.1:3306)"
-dbUserName="root"
-dbUserPassword="tp52006211999"
-dbName="library"
-dbCharset="utf8"
