@@ -34,6 +34,16 @@ func GetManagerById(id int64) ([]*Manager, error) {
 	return managers, err
 }
 
+func ExistsManagerById(id int64) bool {
+	db := method.DBOpen()
+	defer db.Close()
+	var managers []*Manager
+	if db.First(&managers, id).RowsAffected == 0 {
+		return false
+	}
+	return true
+}
+
 func AddManager(manager *Manager) error {
 	db := method.DBOpen()
 	defer db.Close()

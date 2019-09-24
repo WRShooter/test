@@ -29,6 +29,16 @@ func GetCert_CateById(id int64) ([]*Cert_cate, error) {
 	return Cert_cates, err
 }
 
+func ExistsCert_CateById(id int64) bool {
+	db := method.DBOpen()
+	defer db.Close()
+	var Cert_cates []*Cert_cate
+	if db.Preload("Cert_cate_lists").First(&Cert_cates, id).RowsAffected == 0 {
+		return false
+	}
+	return true
+}
+
 func AddCert_Cate(cert_cate *Cert_cate) error {
 	db := method.DBOpen()
 	defer db.Close()

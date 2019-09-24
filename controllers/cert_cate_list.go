@@ -34,13 +34,16 @@ func GetCert_Cate_ListByID(c *gin.Context) {
 func CreateCert_Cate_List(c *gin.Context) {
 	var cert_cate_list *models.Cert_cate_list
 	c.BindJSON(&cert_cate_list)
-	err := models.AddCert_Cate_List(cert_cate_list)
-	if err != nil {
-		c.AbortWithStatus(404)
-		fmt.Println(err)
-	} else {
-		c.JSON(200, cert_cate_list)
+	if models.ExistsCert_Cate_ListById(int64(cert_cate_list.Id)) == false {
+		err := models.AddCert_Cate_List(cert_cate_list)
+		if err != nil {
+			c.AbortWithStatus(404)
+			fmt.Println(err)
+		} else {
+			c.JSON(200, cert_cate_list)
+		}
 	}
+
 }
 
 func UpdateCert_Cate_List(c *gin.Context) {
@@ -84,10 +87,12 @@ func UpdateCert_Cate_List(c *gin.Context) {
 func DeleteCert_Cate_List(c *gin.Context) {
 	Id := c.Param("id")
 	id, _ := strconv.ParseInt(Id, 10, 64)
-	err := models.DeleteCert_Cate_List(id)
-	if err != nil {
-		c.AbortWithStatus(404)
-		fmt.Println(err)
+	if models.ExistsCert_Cate_ListById(id) == true {
+		err := models.DeleteCert_Cate_List(id)
+		if err != nil {
+			c.AbortWithStatus(404)
+			fmt.Println(err)
+		}
+		c.JSON(200, gin.H{"id #" + Id: "deleted"})
 	}
-	c.JSON(200, gin.H{"id #" + Id: "deleted"})
 }

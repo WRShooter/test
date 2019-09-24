@@ -34,12 +34,14 @@ func GetStaffByID(c *gin.Context) {
 func CreateStaff(c *gin.Context) {
 	var staff *models.Staff
 	c.BindJSON(&staff)
-	err := models.AddStaff(staff)
-	if err != nil {
-		c.AbortWithStatus(404)
-		fmt.Println(err)
-	} else {
-		c.JSON(200, staff)
+	if models.ExistsStaffById(int64(staff.Id)) == false {
+		err := models.AddStaff(staff)
+		if err != nil {
+			c.AbortWithStatus(404)
+			fmt.Println(err)
+		} else {
+			c.JSON(200, staff)
+		}
 	}
 }
 
@@ -92,10 +94,13 @@ func UpdateStaff(c *gin.Context) {
 func DeleteStaff(c *gin.Context) {
 	Id := c.Param("id")
 	id, _ := strconv.ParseInt(Id, 10, 64)
-	err := models.DeleteStaff(id)
-	if err != nil {
-		c.AbortWithStatus(404)
-		fmt.Println(err)
+	if models.ExistsStaffById(id) == true {
+
+		err := models.DeleteStaff(id)
+		if err != nil {
+			c.AbortWithStatus(404)
+			fmt.Println(err)
+		}
+		c.JSON(200, gin.H{"id #" + Id: "deleted"})
 	}
-	c.JSON(200, gin.H{"id #" + Id: "deleted"})
 }

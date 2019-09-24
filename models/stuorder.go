@@ -40,6 +40,16 @@ func AddStuoders(stuorder *Stuorder) error {
 	return err
 }
 
+func ExistsStuoderByWId(wid int64) bool {
+	db := method.DBOpen()
+	defer db.Close()
+	var stuorders []*Stuorder
+	if db.First(&stuorders, wid).RowsAffected == 0 {
+		return false
+	}
+	return true
+}
+
 func (stuorder *Stuorder) UpdateStuoders() error {
 	db := method.DBOpen()
 	defer db.Close()

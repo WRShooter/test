@@ -34,12 +34,14 @@ func GetStuorderByID(c *gin.Context) {
 func CreateStuorder(c *gin.Context) {
 	var stuorder *models.Stuorder
 	c.BindJSON(&stuorder)
-	err := models.AddStuoders(stuorder)
-	if err != nil {
-		c.AbortWithStatus(404)
-		fmt.Println(err)
-	} else {
-		c.JSON(200, stuorder)
+	if models.ExistsStuoderByWId(int64(stuorder.W_id)) == false {
+		err := models.AddStuoders(stuorder)
+		if err != nil {
+			c.AbortWithStatus(404)
+			fmt.Println(err)
+		} else {
+			c.JSON(200, stuorder)
+		}
 	}
 }
 
@@ -68,10 +70,12 @@ func UpdateStuorder(c *gin.Context) {
 func DeleteStuorder(c *gin.Context) {
 	WId := c.Param("wid")
 	wid, _ := strconv.ParseInt(WId, 10, 64)
-	err := models.DeleteStuoders(wid)
-	if err != nil {
-		c.AbortWithStatus(404)
-		fmt.Println(err)
+	if models.ExistsStuoderByWId(wid) == true {
+		err := models.DeleteStuoders(wid)
+		if err != nil {
+			c.AbortWithStatus(404)
+			fmt.Println(err)
+		}
+		c.JSON(200, gin.H{"wid #" + WId: "deleted"})
 	}
-	c.JSON(200, gin.H{"wid #" + WId: "deleted"})
 }

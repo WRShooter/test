@@ -37,6 +37,16 @@ func GetCert_SaveById(id int64) ([]*Cert_save, error) {
 	return Cert_saves, err
 }
 
+func ExistsCert_SaveById(id int64) bool {
+	db := method.DBOpen()
+	defer db.Close()
+	var Cert_saves []*Cert_save
+	if db.Preload("Cert_cate_lists").First(&Cert_saves, id).RowsAffected == 0 {
+		return false
+	}
+	return true
+}
+
 func AddCert_Save(cert_save *Cert_save) error {
 	db := method.DBOpen()
 	defer db.Close()

@@ -33,6 +33,16 @@ func GetCert_Cate_ListById(id int64) ([]*Cert_cate_list, error) {
 	return cert_cate_lists, err
 }
 
+func ExistsCert_Cate_ListById(id int64) bool {
+	db := method.DBOpen()
+	defer db.Close()
+	var cert_cate_lists []*Cert_cate_list
+	if db.First(&cert_cate_lists, id).RowsAffected == 0 {
+		return false
+	}
+	return true
+}
+
 func AddCert_Cate_List(cert_cate_list *Cert_cate_list) error {
 	db := method.DBOpen()
 	defer db.Close()

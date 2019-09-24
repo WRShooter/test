@@ -34,12 +34,14 @@ func GetManagerByID(c *gin.Context) {
 func CreateManager(c *gin.Context) {
 	var manager *models.Manager
 	c.BindJSON(&manager)
-	err := models.AddManager(manager)
-	if err != nil {
-		c.AbortWithStatus(404)
-		fmt.Println(err)
-	} else {
-		c.JSON(200, manager)
+	if models.ExistsManagerById(int64(manager.Id)) == false {
+		err := models.AddManager(manager)
+		if err != nil {
+			c.AbortWithStatus(404)
+			fmt.Println(err)
+		} else {
+			c.JSON(200, manager)
+		}
 	}
 }
 
@@ -88,10 +90,12 @@ func UpdateManager(c *gin.Context) {
 func DeleteManager(c *gin.Context) {
 	Id := c.Param("id")
 	id, _ := strconv.ParseInt(Id, 10, 64)
-	err := models.DeleteManager(id)
-	if err != nil {
-		c.AbortWithStatus(404)
-		fmt.Println(err)
+	if models.ExistsManagerById(id) == true {
+		err := models.DeleteManager(id)
+		if err != nil {
+			c.AbortWithStatus(404)
+			fmt.Println(err)
+		}
+		c.JSON(200, gin.H{"id #" + Id: "deleted"})
 	}
-	c.JSON(200, gin.H{"id #" + Id: "deleted"})
 }

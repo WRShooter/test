@@ -120,10 +120,12 @@ func UpdateStudent(c *gin.Context) {
 func DeleteStudent(c *gin.Context) {
 	Id := c.Param("id")
 	id, _ := strconv.ParseInt(Id, 10, 64)
-	err := models.DeleteStudent(id)
-	if err != nil {
-		c.AbortWithStatus(404)
-		fmt.Println(err)
+	if models.ExistsStudentById(int64(id)) == true {
+		err := models.DeleteStudent(id)
+		if err != nil {
+			c.AbortWithStatus(404)
+			fmt.Println(err)
+		}
+		c.JSON(200, gin.H{"id #" + Id: "deleted"})
 	}
-	c.JSON(200, gin.H{"id #" + Id: "deleted"})
 }

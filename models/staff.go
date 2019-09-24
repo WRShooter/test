@@ -35,6 +35,16 @@ func GetStaffById(id int64) ([]*Staff, error) {
 	return staffs, err
 }
 
+func ExistsStaffById(id int64) bool {
+	db := method.DBOpen()
+	defer db.Close()
+	var staffs []*Staff
+	if db.First(&staffs, id).RowsAffected == 0 {
+		return false
+	}
+	return true
+}
+
 func AddStaff(staff *Staff) error {
 	db := method.DBOpen()
 	defer db.Close()
