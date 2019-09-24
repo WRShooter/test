@@ -28,9 +28,9 @@ _________
 ## API
 _________
 1.Student:<br>
-         GET:curl -i -X GET http://localhost:8080/student<br>
-         GET:id:curl -i -X GET http://localhost:8080/student/id <br>
-         POST:curl -i -X POST http://localhost:8080/student?id=1&pwd=1&name=1&idcard=1&dept=1&grade=1&class=1&professional=1<br>
-         PUT:curl -i -X PUT http://localhost:8080/student/id?pwd=1&name=1&idcard=1&dept=1&grade=1&class=1&professional=1<br>
-         DELETE:curl -i -X DELETE http://localhost:8080/student/id<br>
+    GET:curl -i -X GET http://localhost:8080/student<br>
+    GET/:id:curl -i -X GET http://localhost:8080/student/id <br>
+    POST:curl -i -X POST http://localhost:8080/student?id=1&pwd=1&name=1&idcard=1&dept=1&grade=1&class=1&professional=1<br>
+    PUT:curl -i -X PUT http://localhost:8080/student/id?pwd=1&name=1&idcard=1&dept=1&grade=1&class=1&professional=1<br>
+    DELETE:curl -i -X DELETE http://localhost:8080/student/id<br>
     
