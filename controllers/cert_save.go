@@ -1,78 +1,93 @@
 package controllers
 
 import (
-	"encoding/json"
 	"fmt"
 	"gormtest/models"
+	"net/http"
+	"strconv"
 
-	"github.com/astaxie/beego"
+	"github.com/gin-gonic/gin"
 )
 
-type Cert_SaveController struct {
-	beego.Controller
+func GetAllCert_Saves(c *gin.Context) {
+	cert_saves, err := models.GetAllCert_Saves()
+	if err != nil {
+		c.AbortWithStatus(404)
+		fmt.Println(err)
+	} else {
+		c.JSON(200, cert_saves)
+	}
 }
 
-// @Title 获得所有证书
-// @Description 返回所有的证书数据
-// @Success 200 {object} models.Cert_save
-// @router / [get]
-func (u *Cert_SaveController) GetAll() {
-	ss := models.GetAllCert_Saves()
-	u.Data["json"] = ss
-	fmt.Println(ss)
-	u.ServeJSON()
+func GetCert_SaveByID(c *gin.Context) {
+	Id := c.Params.ByName("id")
+	id, _ := strconv.ParseInt(Id, 10, 64)
+	cert_save, err := models.GetCert_SaveById(id)
+	if err != nil {
+		c.AbortWithStatus(404)
+		fmt.Println(err)
+	} else {
+		c.JSON(200, cert_save)
+	}
 }
 
-// @Title 创建职工
-// @Description 创建职工
-// @Param      body          body   models.Cert_save true          "body for user content"
-// @Success 200 create success
-// @Failure 403 body is empty
-// @router / [post]
-func (u *Cert_SaveController) Post() {
-	var s models.Cert_save
-	json.Unmarshal(u.Ctx.Input.RequestBody, &s)
-	id := models.AddCert_Save(&s)
-	u.Data["json"] = id
-	fmt.Println(id)
-	u.ServeJSON()
+func CreateCert_Save(c *gin.Context) {
+	var cert_save *models.Cert_save
+	c.BindJSON(&cert_save)
+	err := models.AddCert_Save(cert_save)
+	if err != nil {
+		c.AbortWithStatus(404)
+		fmt.Println(err)
+	} else {
+		c.JSON(200, cert_save)
+	}
 }
 
-// @Title 获得一个证书
-// @Description 返回某证书数据
-// @Param      id            path   int    true          "The key for staticblock"
-// @Success 200 {object} models.Cert_save
-// @router /:id [get]
-func (u *Cert_SaveController) GetById() {
-	id, _ := u.GetInt64(":id")
-	fmt.Println(id)
-	s := models.GetCert_SaveById(id)
-	u.Data["json"] = s
-	u.ServeJSON()
+func UpdateCert_Save(c *gin.Context) {
+	time := c.Query("time")
+	stu_id, _ := strconv.ParseInt(c.Query("stu_id"), 10, 64)
+	num := c.Query("num")
+	cert_id, _ := strconv.Atoi(c.Query("cert_id"))
+	input_id, _ := strconv.Atoi(c.Query("input_id"))
+	Id := c.Param("id")
+	id, err := strconv.ParseInt(Id, 10, 64)
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+		fmt.Println(err)
+	}
+	cert_saves, _ := models.GetCert_SaveById(id)
+	cert_save := &models.Cert_save{Time: cert_saves[0].Time, Stu_id: cert_saves[0].Stu_id, Num: cert_saves[0].Num, Input_id: cert_saves[0].Input_id, CreatedAt: cert_saves[0].CreatedAt}
+	cert_save.Id = int(id)
+	c.ShouldBind(&cert_save)
+	if time != "" {
+		cert_save.Time = time
+	}
+	if stu_id >= 0 {
+		cert_save.Stu_id = int(stu_id)
+	}
+	if cert_id >= 0 {
+		cert_save.Cert_id = cert_id
+	}
+	if num != "" {
+		cert_save.Num = num
+	}
+	if input_id >= 0 {
+		cert_save.Input_id = input_id
+	}
+	err = cert_save.UpdateCert_Save()
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+	}
+	c.JSON(200, cert_save)
 }
 
-// @Title 修改证书
-// @Description 修改证书的内容
-// @Param      body          body   models.Cert_save true          "body for user content"
-// @Success 200 create success
-// @Failure 403 body is empty
-// @router / [put]
-func (u *Cert_SaveController) Update() {
-	var s models.Cert_save
-	json.Unmarshal(u.Ctx.Input.RequestBody, &s)
-	models.UpdateCert_Save(&s)
-	u.Data["json"] = s
-	u.ServeJSON()
-}
-
-// @Title 删除一个证书
-// @Description 删除某证书数据
-// @Param      id            path   int    true          "The key for staticblock"
-// @Success 200 {object} models.Cert_save
-// @router /:id [delete]
-func (u *Cert_SaveController) Delete() {
-	id, _ := u.GetInt64(":id")
-	models.DeleteCert_Save(id)
-	u.Data["json"] = true
-	u.ServeJSON()
+func DeleteCert_Save(c *gin.Context) {
+	Id := c.Param("id")
+	id, _ := strconv.ParseInt(Id, 10, 64)
+	err := models.DeleteCert_Save(id)
+	if err != nil {
+		c.AbortWithStatus(404)
+		fmt.Println(err)
+	}
+	c.JSON(200, gin.H{"id #" + Id: "deleted"})
 }

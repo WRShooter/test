@@ -1,78 +1,77 @@
 package controllers
 
 import (
-	"encoding/json"
 	"fmt"
 	"gormtest/models"
+	"net/http"
+	"strconv"
 
-	"github.com/astaxie/beego"
+	"github.com/gin-gonic/gin"
 )
 
-type StuOrderController struct {
-	beego.Controller
+func GetAllStuorders(c *gin.Context) {
+	stuorders, err := models.GetAllStuoders()
+	if err != nil {
+		c.AbortWithStatus(404)
+		fmt.Println(err)
+	} else {
+		c.JSON(200, stuorders)
+	}
 }
 
-// @Title 获得所有证书
-// @Description 返回所有的证书数据
-// @Success 200 {object} models.Stuorder
-// @router / [get]
-func (u *StuOrderController) GetAll() {
-	ss := models.GetAllStuoders()
-	u.Data["json"] = ss
-	fmt.Println(ss)
-	u.ServeJSON()
+func GetStuorderByID(c *gin.Context) {
+	WId := c.Params.ByName("wid")
+	wid, _ := strconv.ParseInt(WId, 10, 64)
+	stuorders, err := models.GetStuodersByWId(wid)
+	if err != nil {
+		c.AbortWithStatus(404)
+		fmt.Println(err)
+	} else {
+		c.JSON(200, stuorders)
+	}
 }
 
-// @Title 获得一个学生的学生证书
-// @Description 返回某学生学生证书数据
-// @Param      wid            path   int    true          "The key for staticblock"
-// @Success 200 {object} models.Stuorder
-// @router /:wid [get]
-func (u *StuOrderController) GetById() {
-	id, _ := u.GetInt64(":wid")
-	fmt.Println(id)
-	s := models.GetStuodersByWId(id)
-	u.Data["json"] = s
-	u.ServeJSON()
+func CreateStuorder(c *gin.Context) {
+	var stuorder *models.Stuorder
+	c.BindJSON(&stuorder)
+	err := models.AddStuoders(stuorder)
+	if err != nil {
+		c.AbortWithStatus(404)
+		fmt.Println(err)
+	} else {
+		c.JSON(200, stuorder)
+	}
 }
 
-// @Title 创建学生证书
-// @Description 创建学生证书
-// @Param      body          body   models.Stuorder true          "body for user content"
-// @Success 200 create success
-// @Failure 403 body is empty
-// @router / [post]
-func (u *StuOrderController) Insert() {
-	var s models.Stuorder
-	json.Unmarshal(u.Ctx.Input.RequestBody, &s)
-	id := models.AddStuoders(&s)
-	u.Data["json"] = id
-	fmt.Println(id)
-	u.ServeJSON()
+func UpdateStuorder(c *gin.Context) {
+	w_flag, _ := strconv.Atoi(c.Query("w_flag"))
+	WId := c.Param("wid")
+	wid, err := strconv.ParseInt(WId, 10, 64)
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+		fmt.Println(err)
+	}
+	stuorders, _ := models.GetStuodersByWId(wid)
+	stuorder := &models.Stuorder{CreatedAt: stuorders[0].CreatedAt, Question: stuorders[0].Question, Stu_id: stuorders[0].Stu_id, W_flag: stuorders[0].W_flag}
+	stuorder.W_id = int(wid)
+	c.ShouldBind(&stuorder)
+	if w_flag >= 0 {
+		stuorder.W_flag = w_flag
+	}
+	err = stuorder.UpdateStuoders()
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+	}
+	c.JSON(200, stuorder)
 }
 
-// @Title 修改学生证书
-// @Description 修改学生证书的内容
-// @Param      body          body   models.Stuorder true          "body for user content"
-// @Success 200 {int} models.StuOrder
-// @Failure 403 body is empty
-// @router / [put]
-func (u *StuOrderController) Update() {
-	var s models.Stuorder
-	json.Unmarshal(u.Ctx.Input.RequestBody, &s)
-	models.UpdateStuoders(&s)
-	u.Data["json"] = s
-	u.ServeJSON()
-}
-
-// @Title 删除一个学生证书
-// @Description 删除某学生数据
-// @Param      wid            path   int    true          "The key for staticblock"
-// @Success 200 {object} models.Stuorder
-// @router /:wid [delete]
-func (u *StuOrderController) Delete() {
-	id, _ := u.GetInt64(":wid")
-	models.DeleteStuoders(id)
-	u.Data["json"] = true
-	u.ServeJSON()
+func DeleteStuorder(c *gin.Context) {
+	WId := c.Param("wid")
+	wid, _ := strconv.ParseInt(WId, 10, 64)
+	err := models.DeleteStuoders(wid)
+	if err != nil {
+		c.AbortWithStatus(404)
+		fmt.Println(err)
+	}
+	c.JSON(200, gin.H{"wid #" + WId: "deleted"})
 }

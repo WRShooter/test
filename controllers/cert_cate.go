@@ -1,78 +1,77 @@
 package controllers
 
 import (
-	"encoding/json"
 	"fmt"
 	"gormtest/models"
+	"net/http"
+	"strconv"
 
-	"github.com/astaxie/beego"
+	"github.com/gin-gonic/gin"
 )
 
-type Cert_CateController struct {
-	beego.Controller
+func GetAllCert_Cates(c *gin.Context) {
+	cert_cates, err := models.GetAllCert_Cates()
+	if err != nil {
+		c.AbortWithStatus(404)
+		fmt.Println(err)
+	} else {
+		c.JSON(200, cert_cates)
+	}
 }
 
-// @Title 获得所有证书
-// @Description 返回所有的证书数据
-// @Success 200 {object} models.Cert_cate
-// @router / [get]
-func (u *Cert_CateController) GetAll() {
-	ss := models.GetAllCert_Cates()
-	u.Data["json"] = ss
-	fmt.Println(ss)
-	u.ServeJSON()
+func GetCert_CateByID(c *gin.Context) {
+	Id := c.Params.ByName("id")
+	id, _ := strconv.ParseInt(Id, 10, 64)
+	cert_cate, err := models.GetCert_CateById(id)
+	if err != nil {
+		c.AbortWithStatus(404)
+		fmt.Println(err)
+	} else {
+		c.JSON(200, cert_cate)
+	}
 }
 
-// @Title 创建证书
-// @Description 创建证书
-// @Param      body          body   models.Cert_cate true          "body for user content"
-// @Success 200 create success
-// @Failure 403 body is empty
-// @router / [post]
-func (u *Cert_CateController) Post() {
-	var s models.Cert_cate
-	json.Unmarshal(u.Ctx.Input.RequestBody, &s)
-	id := models.AddCert_Cate(&s)
-	u.Data["json"] = id
-	fmt.Println(id)
-	u.ServeJSON()
+func CreateCert_Cate(c *gin.Context) {
+	var cert_cate *models.Cert_cate
+	c.BindJSON(&cert_cate)
+	err := models.AddCert_Cate(cert_cate)
+	if err != nil {
+		c.AbortWithStatus(404)
+		fmt.Println(err)
+	} else {
+		c.JSON(200, cert_cate)
+	}
 }
 
-// @Title 获得一个证书
-// @Description 返回某证书数据
-// @Param      id            path   int    true          "The key for staticblock"
-// @Success 200 {object} models.Cert_cate
-// @router /:id [get]
-func (u *Cert_CateController) GetById() {
-	id, _ := u.GetInt64(":id")
-	fmt.Println(id)
-	s := models.GetCert_CateById(id)
-	u.Data["json"] = s
-	u.ServeJSON()
+func UpdateCert_Cate(c *gin.Context) {
+	name := c.Query("name")
+	Id := c.Param("id")
+	id, err := strconv.ParseInt(Id, 10, 64)
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+		fmt.Println(err)
+	}
+	cert_cates, _ := models.GetCert_CateById(id)
+	cert_cate := &models.Cert_cate{Name: cert_cates[0].Name}
+	cert_cate.Id = int(id)
+	c.ShouldBind(&cert_cate)
+	if name != "" {
+		cert_cate.Name = name
+	}
+	err = cert_cate.UpdateCert_Cate()
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+	}
+	c.JSON(200, cert_cate)
 }
 
-// @Title 修改证书
-// @Description 修改证书的内容
-// @Param      body          body   models.Cert_cate true          "body for user content"
-// @Success 200 create success
-// @Failure 403 body is empty
-// @router / [put]
-func (u *Cert_CateController) Update() {
-	var s models.Cert_cate
-	json.Unmarshal(u.Ctx.Input.RequestBody, &s)
-	models.UpdateCert_Cate(&s)
-	u.Data["json"] = s
-	u.ServeJSON()
-}
-
-// @Title 删除一个证书
-// @Description 删除某证书数据
-// @Param      id            path   int    true          "The key for staticblock"
-// @Success 200 {object} models.Cert_cate
-// @router /:id [delete]
-func (u *Cert_CateController) Delete() {
-	id, _ := u.GetInt64(":id")
-	models.DeleteCert_Cate(id)
-	u.Data["json"] = true
-	u.ServeJSON()
+func DeleteCert_Cate(c *gin.Context) {
+	Id := c.Param("id")
+	id, _ := strconv.ParseInt(Id, 10, 64)
+	err := models.DeleteCert_Cate(id)
+	if err != nil {
+		c.AbortWithStatus(404)
+		fmt.Println(err)
+	}
+	c.JSON(200, gin.H{"id #" + Id: "deleted"})
 }

@@ -1,78 +1,101 @@
 package controllers
 
 import (
-	"encoding/json"
 	"fmt"
 	"gormtest/models"
+	"net/http"
+	"strconv"
 
-	"github.com/astaxie/beego"
+	"github.com/gin-gonic/gin"
 )
 
-type StaffController struct {
-	beego.Controller
+func GetAllStaffs(c *gin.Context) {
+	staffs, err := models.GetAllStaffs()
+	if err != nil {
+		c.AbortWithStatus(404)
+		fmt.Println(err)
+	} else {
+		c.JSON(200, staffs)
+	}
 }
 
-// @Title 获得所有职工
-// @Description 返回所有的职工数据
-// @Success 200 {object} models.Staff
-// @router / [get]
-func (u *StaffController) GetAll() {
-	ss := models.GetAllStaffs()
-	u.Data["json"] = ss
-	fmt.Println(ss)
-	u.ServeJSON()
+func GetStaffByID(c *gin.Context) {
+	Id := c.Params.ByName("id")
+	id, _ := strconv.ParseInt(Id, 10, 64)
+	stuorders, err := models.GetStaffById(id)
+	if err != nil {
+		c.AbortWithStatus(404)
+		fmt.Println(err)
+	} else {
+		c.JSON(200, stuorders)
+	}
 }
 
-// @Title 创建职工
-// @Description 创建职工
-// @Param      body          body   models.Staff true          "body for user content"
-// @Success 200 create success
-// @Failure 403 body is empty
-// @router / [post]
-func (u *StaffController) Post() {
-	var s models.Staff
-	json.Unmarshal(u.Ctx.Input.RequestBody, &s)
-	uid := models.AddStaff(&s)
-	u.Data["json"] = uid
-	fmt.Println(uid)
-	u.ServeJSON()
+func CreateStaff(c *gin.Context) {
+	var staff *models.Staff
+	c.BindJSON(&staff)
+	err := models.AddStaff(staff)
+	if err != nil {
+		c.AbortWithStatus(404)
+		fmt.Println(err)
+	} else {
+		c.JSON(200, staff)
+	}
 }
 
-// @Title 获得一个职工
-// @Description 返回某职工数据
-// @Param      id            path   int    true          "The key for staticblock"
-// @Success 200 {object} models.Staff
-// @router /:id [get]
-func (u *StaffController) GetById() {
-	id, _ := u.GetInt64(":id")
-	fmt.Println(id)
-	s := models.GetStaffById(id)
-	u.Data["json"] = s
-	u.ServeJSON()
+func UpdateStaff(c *gin.Context) {
+	pwd := c.Query("pwd")
+	position := c.Query("postion")
+	phone := c.Query("phone")
+	name := c.Query("name")
+	idcard := c.Query("idcard")
+	dept := c.Query("dept")
+	cap := c.Query("cap")
+	Id := c.Param("id")
+	id, err := strconv.ParseInt(Id, 10, 64)
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+		fmt.Println(err)
+	}
+	staffs, _ := models.GetStaffById(id)
+	staff := &models.Staff{Pwd: staffs[0].Pwd, Position: staffs[0].Position, Phone: staffs[0].Phone, Name: staffs[0].Name, Idcard: staffs[0].Idcard, Dept: staffs[0].Dept, Cap: staffs[0].Cap}
+	staff.Id = int(id)
+	c.ShouldBind(&staff)
+	if pwd != "" {
+		staff.Pwd = pwd
+	}
+	if position != "" {
+		staff.Position = position
+	}
+	if phone != "" {
+		staff.Phone = phone
+	}
+	if name != "" {
+		staff.Name = name
+	}
+	if idcard != "" {
+		staff.Idcard = idcard
+	}
+	if dept != "" {
+		staff.Dept = dept
+	}
+	if cap != "" {
+		staff.Cap = cap
+	}
+	err = staff.UpdateStaff()
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+	}
+	c.JSON(200, staff)
 }
 
-// @Title 修改职工
-// @Description 修改职工的内容
-// @Param      body          body   models.Staff true          "body for user content"
-// @Success 200 {int} models.Staff
-// @Failure 403 body is empty
-// @router / [put]
-func (u *StaffController) Update() {
-	var s models.Staff
-	json.Unmarshal(u.Ctx.Input.RequestBody, &s)
-	models.UpdateStaff(&s)
-	u.Data["json"] = s
-	u.ServeJSON()
-}
-
-// @Title 删除一个职工
-// @Description 删除某职工数据
-// @Param      id            path   int    true          "The key for staticblock"
-// @Success 200 {object} models.Staff
-// @router /:id [delete]
-func (u *StaffController) Delete() {
-	id, _ := u.GetInt64(":id")
-	models.DeleteStaff(id)
-	u.Data["json"] = true
-	u.ServeJSON()
+func DeleteStaff(c *gin.Context) {
+	Id := c.Param("id")
+	id, _ := strconv.ParseInt(Id, 10, 64)
+	err := models.DeleteStaff(id)
+	if err != nil {
+		c.AbortWithStatus(404)
+		fmt.Println(err)
+	}
+	c.JSON(200, gin.H{"id #" + Id: "deleted"})
 }

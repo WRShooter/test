@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/BurntSushi/toml"
-	"github.com/astaxie/beego"
 	"github.com/jinzhu/gorm"
 
 	"github.com/gorilla/mux"
@@ -28,7 +27,7 @@ type Config1 struct {
 }
 
 func (c *Config1) GetConfig1() {
-	if _, err := toml.DecodeFile("./config.toml", &c); err != nil {
+	if _, err := toml.DecodeFile("./conf/config.toml", &c); err != nil {
 		log.Fatal(err)
 	}
 }
@@ -68,12 +67,4 @@ func ReturnUrl() string {
 		dbCfg.Name,
 		dbCfg.Charset)
 	return dbURI
-}
-
-func HttpConfig() {
-	beego.BConfig.Listen.EnableHTTPS = true
-	beego.BConfig.Listen.Graceful = true
-	beego.BConfig.Listen.HTTPSPort = 10000
-	beego.BConfig.Listen.HTTPSCertFile = "tls-gen/basic/server/cert.pem"
-	beego.BConfig.Listen.HTTPSKeyFile = "tls-gen/basic/server/key.pem"
 }

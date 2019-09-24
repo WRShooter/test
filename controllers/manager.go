@@ -1,78 +1,97 @@
 package controllers
 
 import (
-	"encoding/json"
 	"fmt"
 	"gormtest/models"
+	"net/http"
+	"strconv"
 
-	"github.com/astaxie/beego"
+	"github.com/gin-gonic/gin"
 )
 
-type ManagerController struct {
-	beego.Controller
+func GetAllManagers(c *gin.Context) {
+	managers, err := models.GetAllManagers()
+	if err != nil {
+		c.AbortWithStatus(404)
+		fmt.Println(err)
+	} else {
+		c.JSON(200, managers)
+	}
 }
 
-// @Title 获得所有管理员
-// @Description 返回所有的管理员数据
-// @Success 200 {object} models.Manager
-// @router / [get]
-func (u *ManagerController) GetAll() {
-	ss := models.GetAllManagers()
-	u.Data["json"] = ss
-	fmt.Println(ss)
-	u.ServeJSON()
+func GetManagerByID(c *gin.Context) {
+	Id := c.Params.ByName("id")
+	id, _ := strconv.ParseInt(Id, 10, 64)
+	manager, err := models.GetManagerById(id)
+	if err != nil {
+		c.AbortWithStatus(404)
+		fmt.Println(err)
+	} else {
+		c.JSON(200, manager)
+	}
 }
 
-// @Title 创建管理员
-// @Description 创建管理员
-// @Param      body          body   models.Manager true          "body for user content"
-// @Success 200 create success
-// @Failure 403 body is empty
-// @router / [post]
-func (u *ManagerController) Post() {
-	var s models.Manager
-	json.Unmarshal(u.Ctx.Input.RequestBody, &s)
-	uid := models.AddManager(&s)
-	u.Data["json"] = uid
-	fmt.Println(uid)
-	u.ServeJSON()
+func CreateManager(c *gin.Context) {
+	var manager *models.Manager
+	c.BindJSON(&manager)
+	err := models.AddManager(manager)
+	if err != nil {
+		c.AbortWithStatus(404)
+		fmt.Println(err)
+	} else {
+		c.JSON(200, manager)
+	}
 }
 
-// @Title 获得一个管理员
-// @Description 返回某管理员数据
-// @Param      id            path   int    true          "The key for staticblock"
-// @Success 200 {object} models.Manager
-// @router /:id [get]
-func (u *ManagerController) GetById() {
-	id, _ := u.GetInt64(":id")
-	fmt.Println(id)
-	s := models.GetManagerById(id)
-	u.Data["json"] = s
-	u.ServeJSON()
+func UpdateManager(c *gin.Context) {
+	pwd := c.Query("pwd")
+	phone := c.Query("phone")
+	name := c.Query("name")
+	idcard := c.Query("idcard")
+	department := c.Query("department")
+	cap := c.Query("cap")
+	Id := c.Param("id")
+	id, err := strconv.ParseInt(Id, 10, 64)
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+		fmt.Println(err)
+	}
+	managers, _ := models.GetManagerById(id)
+	manager := &models.Manager{Pwd: managers[0].Pwd, Phone: managers[0].Phone, Name: managers[0].Name, Idcard: managers[0].Idcard, Department: managers[0].Department, Cap: managers[0].Cap}
+	manager.Id = int(id)
+	c.ShouldBind(&manager)
+	if pwd != "" {
+		manager.Pwd = pwd
+	}
+	if department != "" {
+		manager.Department = department
+	}
+	if phone != "" {
+		manager.Phone = phone
+	}
+	if name != "" {
+		manager.Name = name
+	}
+	if idcard != "" {
+		manager.Idcard = idcard
+	}
+	if cap != "" {
+		manager.Cap = cap
+	}
+	err = manager.UpdateManager()
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+	}
+	c.JSON(200, manager)
 }
 
-// @Title 修改管理员
-// @Description 修改管理员的内容
-// @Param      body          body   models.Manager true          "body for user content"
-// @Success 200 {int} models.Manager
-// @Failure 403 body is empty
-// @router / [put]
-func (u *ManagerController) Update() {
-	var s models.Manager
-	json.Unmarshal(u.Ctx.Input.RequestBody, &s)
-	models.UpdateManager(&s)
-	u.Data["json"] = s
-	u.ServeJSON()
-}
-
-// @Title 删除一个管理员
-// @Description 删除某管理员数据
-// @Param      id            path   int    true          "The key for staticblock"
-// @Success 200 {object} models.Manager
-// @router /:id [delete]
-func (u *ManagerController) Delete() {
-	id, _ := u.GetInt64(":id")
-	models.DeleteManager(id)
-	u.Data["json"] = true
-	u.ServeJSON()
+func DeleteManager(c *gin.Context) {
+	Id := c.Param("id")
+	id, _ := strconv.ParseInt(Id, 10, 64)
+	err := models.DeleteManager(id)
+	if err != nil {
+		c.AbortWithStatus(404)
+		fmt.Println(err)
+	}
+	c.JSON(200, gin.H{"id #" + Id: "deleted"})
 }

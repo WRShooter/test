@@ -1,7 +1,6 @@
 package models
 
 import (
-	"fmt"
 	"gormtest/method"
 )
 
@@ -18,42 +17,39 @@ func (Cert_cate_list) TableName() string {
 	return "Cert_cate_list"
 }
 
-func GetAllCert_Cate_Lists() []*Cert_cate_list {
+func GetAllCert_Cate_Lists() ([]*Cert_cate_list, error) {
 	db := method.DBOpen()
 	defer db.Close()
 	var cert_cate_lists []*Cert_cate_list
-	db.Find(&cert_cate_lists)
-	return cert_cate_lists
+	err := db.Find(&cert_cate_lists).Error
+	return cert_cate_lists, err
 }
 
-func GetCert_Cate_ListById(id int64) []*Cert_cate_list {
+func GetCert_Cate_ListById(id int64) ([]*Cert_cate_list, error) {
 	db := method.DBOpen()
 	defer db.Close()
 	var cert_cate_lists []*Cert_cate_list
-	db.First(&cert_cate_lists, id)
-	return cert_cate_lists
+	err := db.First(&cert_cate_lists, id).Error
+	return cert_cate_lists, err
 }
 
-func AddCert_Cate_List(cert_cate_list *Cert_cate_list) int {
+func AddCert_Cate_List(cert_cate_list *Cert_cate_list) error {
 	db := method.DBOpen()
 	defer db.Close()
-	var cert_cates []*Cert_cate
-	if db.First(&cert_cates, cert_cate_list.Cate_id).RowsAffected == 0 {
-		fmt.Println("该证书类别不存在！！！")
-		return 403
-	}
-	db.Debug().Create(&cert_cate_list)
-	return 200
+	err := db.Debug().Create(&cert_cate_list).Error
+	return err
 }
 
-func UpdateCert_Cate_List(cert_cate_list *Cert_cate_list) {
+func (cert_cate_list *Cert_cate_list) UpdateCert_Cate_List() error {
 	db := method.DBOpen()
 	defer db.Close()
-	db.Model(&cert_cate_list).Updates(map[string]interface{}{"id": cert_cate_list.Id, "cate_id": cert_cate_list.Cate_id, "name": cert_cate_list.Name, "institution": cert_cate_list.Institution, "cate_list_level": cert_cate_list.Cate_list_level, "abbreviation": cert_cate_list.Abbreviation})
+	err := db.Model(&cert_cate_list).Updates(map[string]interface{}{"id": cert_cate_list.Id, "cate_id": cert_cate_list.Cate_id, "name": cert_cate_list.Name, "institution": cert_cate_list.Institution, "cate_list_level": cert_cate_list.Cate_list_level, "abbreviation": cert_cate_list.Abbreviation}).Error
+	return err
 }
 
-func DeleteCert_Cate_List(id int64) {
+func DeleteCert_Cate_List(id int64) error {
 	db := method.DBOpen()
 	defer db.Close()
-	db.Delete(&Cert_cate_list{}, "id=?", id)
+	err := db.Delete(&Cert_cate_list{}, "id=?", id).Error
+	return err
 }

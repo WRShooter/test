@@ -1,7 +1,6 @@
 package models
 
 import (
-	"fmt"
 	"gormtest/method"
 	"time"
 )
@@ -22,42 +21,39 @@ func (Cert_save) TableName() string {
 	return "cert_save"
 }
 
-func GetAllCert_Saves() []*Cert_save {
+func GetAllCert_Saves() ([]*Cert_save, error) {
 	db := method.DBOpen()
 	defer db.Close()
 	var cert_saves []*Cert_save
-	db.Debug().Preload("Cert_cate_lists").Find(&cert_saves)
-	return cert_saves
+	err := db.Debug().Preload("Cert_cate_lists").Find(&cert_saves).Error
+	return cert_saves, err
 }
 
-func GetCert_SaveById(id int64) []*Cert_save {
+func GetCert_SaveById(id int64) ([]*Cert_save, error) {
 	db := method.DBOpen()
 	defer db.Close()
 	var Cert_saves []*Cert_save
-	db.Preload("Cert_cate_lists").First(&Cert_saves, id)
-	return Cert_saves
+	err := db.Preload("Cert_cate_lists").First(&Cert_saves, id).Error
+	return Cert_saves, err
 }
 
-func AddCert_Save(cert_save *Cert_save) int {
+func AddCert_Save(cert_save *Cert_save) error {
 	db := method.DBOpen()
 	defer db.Close()
-	var cert_cates []*Cert_cate
-	if db.First(&cert_cates, cert_save.Cert_id).RowsAffected == 0 {
-		fmt.Println("该证书类别不存在！！！")
-		return 403
-	}
-	db.Debug().Create(&cert_save)
-	return 200
+	err := db.Debug().Create(&cert_save).Error
+	return err
 }
 
-func UpdateCert_Save(cert_save *Cert_save) {
+func (cert_save *Cert_save) UpdateCert_Save() error {
 	db := method.DBOpen()
 	defer db.Close()
-	db.Model(&cert_save).Updates(map[string]interface{}{"id": cert_save.Id, "input_id": cert_save.Input_id, "num": cert_save.Num, "cert_id": cert_save.Cert_id, "time": cert_save.Time, "stu_id": cert_save.Stu_id})
+	err := db.Model(&cert_save).Updates(map[string]interface{}{"id": cert_save.Id, "input_id": cert_save.Input_id, "num": cert_save.Num, "cert_id": cert_save.Cert_id, "time": cert_save.Time, "stu_id": cert_save.Stu_id}).Error
+	return err
 }
 
-func DeleteCert_Save(id int64) {
+func DeleteCert_Save(id int64) error {
 	db := method.DBOpen()
 	defer db.Close()
-	db.Delete(&Cert_save{}, "id=?", id)
+	err := db.Delete(&Cert_save{}, "id=?", id).Error
+	return err
 }

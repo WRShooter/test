@@ -1,9 +1,7 @@
 package models
 
 import (
-	"fmt"
 	"gormtest/method"
-	"strconv"
 )
 
 type Staff struct {
@@ -21,45 +19,39 @@ func (Staff) TableName() string {
 	return "staff"
 }
 
-func GetAllStaffs() []*Staff {
+func GetAllStaffs() ([]*Staff, error) {
 	db := method.DBOpen()
 	defer db.Close()
 	var staffs []*Staff
-	db.Find(&staffs)
-	return staffs
+	err := db.Find(&staffs).Error
+	return staffs, err
 }
 
-func GetStaffById(id int64) []*Staff {
+func GetStaffById(id int64) ([]*Staff, error) {
 	db := method.DBOpen()
 	defer db.Close()
 	var staffs []*Staff
-	db.First(&staffs, id)
-	return staffs
+	err := db.First(&staffs, id).Error
+	return staffs, err
 }
 
-func AddStaff(staff *Staff) int {
+func AddStaff(staff *Staff) error {
 	db := method.DBOpen()
 	defer db.Close()
-	if len(strconv.Itoa(staff.Id)) != 8 {
-		fmt.Println("ID的长度应为8，输入错误！！！")
-		return 403
-	} else if len(staff.Idcard) != 18 {
-		fmt.Println("IDcard的长度为18，输入错误！！！")
-		return 403
-	} else {
-		db.Create(&staff)
-		return 200
-	}
+	err := db.Create(&staff).Error
+	return err
 }
 
-func UpdateStaff(staff *Staff) {
+func (staff *Staff) UpdateStaff() error {
 	db := method.DBOpen()
 	defer db.Close()
-	db.Model(&staff).Updates(map[string]interface{}{"id": staff.Id, "idcard": staff.Idcard, "name": staff.Name, "dept": staff.Dept, "phone": staff.Phone, "position": staff.Cap, "cap": staff.Cap})
+	err := db.Model(&staff).Updates(map[string]interface{}{"id": staff.Id, "idcard": staff.Idcard, "name": staff.Name, "dept": staff.Dept, "phone": staff.Phone, "position": staff.Cap, "cap": staff.Cap}).Error
+	return err
 }
 
-func DeleteStaff(id int64) {
+func DeleteStaff(id int64) error {
 	db := method.DBOpen()
 	defer db.Close()
-	db.Delete(&Student{}, "id=?", id)
+	err := db.Delete(&Student{}, "id=?", id).Error
+	return err
 }

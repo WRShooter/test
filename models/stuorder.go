@@ -1,7 +1,6 @@
 package models
 
 import (
-	"fmt"
 	"gormtest/method"
 	"time"
 )
@@ -18,42 +17,39 @@ func (Stuorder) TableName() string {
 	return "stuorder"
 }
 
-func GetAllStuoders() []*Stuorder {
+func GetAllStuoders() ([]*Stuorder, error) {
 	db := method.DBOpen()
 	defer db.Close()
 	var stuorders []*Stuorder
-	db.Find(&stuorders)
-	return stuorders
+	err := db.Find(&stuorders).Error
+	return stuorders, err
 }
 
-func GetStuodersByWId(id int64) []*Stuorder {
+func GetStuodersByWId(wid int64) ([]*Stuorder, error) {
 	db := method.DBOpen()
 	defer db.Close()
 	var stuorders []*Stuorder
-	db.First(&stuorders, id)
-	return stuorders
+	err := db.First(&stuorders, wid).Error
+	return stuorders, err
 }
 
-func AddStuoders(stuorder *Stuorder) int {
+func AddStuoders(stuorder *Stuorder) error {
 	db := method.DBOpen()
 	defer db.Close()
-	var students []Student
-	if db.First(&students, stuorder.Stu_id).RowsAffected == 0 {
-		fmt.Println("该学生不存在！！！")
-		return 403
-	}
-	db.Create(&stuorder)
-	return 200
+	err := db.Create(&stuorder).Error
+	return err
 }
 
-func UpdateStuoders(stuorder *Stuorder) {
+func (stuorder *Stuorder) UpdateStuoders() error {
 	db := method.DBOpen()
 	defer db.Close()
-	db.Model(&stuorder).Updates(map[string]interface{}{"wid": stuorder.W_id, "stu_id": stuorder.Stu_id, "question": stuorder.Question, "w_date": stuorder.CreatedAt, "w_flag": stuorder.W_flag})
+	err := db.Model(&stuorder).Updates(map[string]interface{}{"w_id": stuorder.W_id, "stu_id": stuorder.Stu_id, "question": stuorder.Question, "w_date": stuorder.CreatedAt, "w_flag": stuorder.W_flag}).Error
+	return err
 }
 
-func DeleteStuoders(id int64) {
+func DeleteStuoders(wid int64) error {
 	db := method.DBOpen()
 	defer db.Close()
-	db.Delete(&Stuorder{}, "id=?", id)
+	err := db.Delete(&Stuorder{}, "w_id=?", wid).Error
+	return err
 }
