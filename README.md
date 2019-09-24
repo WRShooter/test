@@ -2,9 +2,9 @@
 用户管理学生的学生证书,写的一些api
 ## 技术选型
 _________
-    1.web:beego<br>
-    2.orm:gorm<br>
-    3.database:mysql
+    1.gin:轻量级Web框架<br>
+    2.gorm:orm,配合mysql使用<br>
+    3.mysql:数据库
 ## 项目结构
 _________
     -Student management system
@@ -13,11 +13,24 @@ _________
         |-controller 控制器目录
         |-method 复用代码
         |-models 模块目录
-        |-routers 路由目录
         |-tls-gen ssl证书
 ## 安装部署
 _________
     git clone https://github.com/WRShooter/test
     cd test
-    bee run -gendoc=true -downdoc=true
+    go run main.go
+
+## 功能
+_________
+    1.创建了用户模型<br>
+    2.实现了基本的curd接口
+
+## API
+_________
+1.Student:<br>
+         GET:curl -i -X GET http://localhost:8080/student<br>
+         GET:id:curl -i -X GET http://localhost:8080/student/id <br>
+         POST:curl -i -X POST http://localhost:8080/student?id=1&pwd=1&name=1&idcard=1&dept=1&grade=1&class=1&professional=1<br>
+         PUT:curl -i -X PUT http://localhost:8080/student/id?pwd=1&name=1&idcard=1&dept=1&grade=1&class=1&professional=1<br>
+         DELETE:curl -i -X DELETE http://localhost:8080/student/id<br>
     
