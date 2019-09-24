@@ -27,7 +27,7 @@ _________
 
 ## API
 _________
-1.Student:<br>
+### 1.Student:<br>
 1):GET:curl -i -X GET localhost:8080/student<br>
 2):GET:curl -i -X GET localhost:8080/student/id <br>
 3):POST:curl -i -X POST localhost:8080/student?id=1&pwd=1&name=1&idcard=1&dept=1&grade=1&class=1&professional=1<br>
